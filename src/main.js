@@ -4,6 +4,7 @@ import components from '@/components/UI';
 
 console.log(components)
 
+//глобальная регистрация компонентов UI
 const app = createApp(App);
 components.forEach(component => {
     app.component(component.name, component)
