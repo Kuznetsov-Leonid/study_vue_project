@@ -6,9 +6,17 @@
 */
 <template>
     <div class="app">
-        <post-form
-            @create="createPost"
-        />
+        <h1>Страница с постами</h1>
+        <my-button
+            @click="showDialog"
+        >
+            Создать пользователя
+        </my-button>
+        <my-dialog v-model:show="dialogVisible">
+            <post-form
+                @create="createPost"
+            />
+        </my-dialog>
         <post-list 
             :posts="posts"
             @remove="removePost"
@@ -31,6 +39,7 @@
                     { id: 3, title: 'Пост о java script 3', body: 'java script универсальный ЯП',},
                     { id: 4, title: 'Пост о java script 4', body: 'java script универсальный ЯП',},
                 ],
+                dialogVisible: false,
             }
         },
         methods: {
@@ -39,6 +48,9 @@
             },
             removePost(post){
                 this.posts = this.posts.filter(p => p.id !== post.id)
+            },
+            showDialog(){
+                this.dialogVisible = true;
             }
         }
     }
