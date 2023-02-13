@@ -9,6 +9,7 @@
         <h1>Страница с постами</h1>
         <my-button
             @click="showDialog"
+            style="margin-top: 10px; margin-bottom: 10px;"
         >
             Создать пользователя
         </my-button>
@@ -45,6 +46,7 @@
         methods: {
             createPost(post){
                 this.posts.push(post);
+                this.dialogVisible = false;
             },
             removePost(post){
                 this.posts = this.posts.filter(p => p.id !== post.id)
