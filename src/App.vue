@@ -9,9 +9,15 @@
         <h1>Страница с постами</h1>
         <my-button
             @click="showDialog"
-            style="margin-top: 10px; margin-bottom: 10px;"
+            style="margin: 15px 0;"
         >
             Создать пользователя
+        </my-button>
+        <my-button
+            @click="fetchPosts"
+            style="margin: 15px 10px;"
+        >
+            Получить посты
         </my-button>
         <my-dialog v-model:show="dialogVisible">
             <post-form
@@ -28,18 +34,14 @@
 <script>
     import PostForm from './components/PostForm.vue';
     import PostList from './components/PostList.vue';
+    import axios from 'axios';
     export default {
         components: {
             PostForm, PostList,
         },
         data(){
             return{
-                posts: [
-                    { id: 1, title: 'Пост о java script 1', body: 'java script универсальный ЯП',},
-                    { id: 2, title: 'Пост о java script 2', body: 'java script универсальный ЯП',},
-                    { id: 3, title: 'Пост о java script 3', body: 'java script универсальный ЯП',},
-                    { id: 4, title: 'Пост о java script 4', body: 'java script универсальный ЯП',},
-                ],
+                posts: [],
                 dialogVisible: false,
             }
         },
@@ -53,6 +55,15 @@
             },
             showDialog(){
                 this.dialogVisible = true;
+            },
+            async fetchPosts(){
+                try { 
+                    const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10');
+                    this.posts = response.data;
+                    console.log(response);
+                } catch (e) {
+                    alert('Ошибка запроса REST API');
+                }
             }
         }
     }
