@@ -7,12 +7,18 @@
 <template>
     <div class="app">
         <h1>Страница с постами</h1>
-        <my-button
+        <div class="app__btns">
+            <my-button
             @click="showDialog"
-            style="margin: 15px 0;"
-        >
+            >
             Создать пользователя
-        </my-button>
+            </my-button>
+            <my-select
+                v-model="selectedSort"
+                :options="sortOptions"
+            />
+        </div>
+        
         <my-button
             @click="fetchPosts"
             style="margin: 15px 10px;"
@@ -25,24 +31,36 @@
             />
         </my-dialog>
         <post-list 
-            :posts="posts"
+            :posts="sortedPosts"
             @remove="removePost"
+            v-if="!isPostsLoading"
         />
+        <div v-else>
+            Идёт загрузка...
+        </div>
     </div>
 </template>
 
 <script>
     import PostForm from './components/PostForm.vue';
     import PostList from './components/PostList.vue';
+    import MySelect from './components/UI/MySelect.vue';
     import axios from 'axios';
+    
     export default {
         components: {
-            PostForm, PostList,
+            PostForm, PostList, MySelect,
         },
         data(){
             return{
                 posts: [],
                 dialogVisible: false,
+                isPostsLoading: false,
+                selectedSort: '',
+                sortOptions: [
+                    {value: 'title', name: 'По названию'},
+                    {value: 'body', name: 'По описанию'},
+                ]
             }
         },
         methods: {
@@ -58,14 +76,24 @@
             },
             async fetchPosts(){
                 try { 
-                    const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10');
+                    this.isPostsLoading = true;
+                    const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10'); 
                     this.posts = response.data;
-                    console.log(response);
                 } catch (e) {
                     alert('Ошибка запроса REST API');
+                } finally {
+                    this.isPostsLoading = false; 
                 }
             }
-        }
+        },
+        mounted() {
+            this.fetchPosts();
+        },
+        computed: {
+            sortedPosts(){
+                return [...this.posts].sort((post1, post2) => post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]));
+            }
+        },
     }
 </script>
 
@@ -77,5 +105,10 @@
     }
     .app{
         padding: 20px;
+    }
+    .app__btns{
+        margin: 15px 0;
+        display: flex;
+        justify-content: space-between;
     }
 </style>
