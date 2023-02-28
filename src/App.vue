@@ -7,11 +7,23 @@
 <template>
     <div class="app">
         <h1>Страница с постами</h1>
-        <my-button
+        <div class="app__btns">
+            <my-button
             @click="showDialog"
-            style="margin-top: 10px; margin-bottom: 10px;"
-        >
+            >
             Создать пользователя
+            </my-button>
+            <my-select
+                v-model="selectedSort"
+                :options="sortOptions"
+            />
+        </div>
+        
+        <my-button
+            @click="fetchPosts"
+            style="margin: 15px 10px;"
+        >
+            Получить посты
         </my-button>
         <my-dialog v-model:show="dialogVisible">
             <post-form
@@ -19,28 +31,36 @@
             />
         </my-dialog>
         <post-list 
-            :posts="posts"
+            :posts="sortedPosts"
             @remove="removePost"
+            v-if="!isPostsLoading"
         />
+        <div v-else>
+            Идёт загрузка...
+        </div>
     </div>
 </template>
 
 <script>
     import PostForm from './components/PostForm.vue';
     import PostList from './components/PostList.vue';
+    import MySelect from './components/UI/MySelect.vue';
+    import axios from 'axios';
+    
     export default {
         components: {
-            PostForm, PostList,
+            PostForm, PostList, MySelect,
         },
         data(){
             return{
-                posts: [
-                    { id: 1, title: 'Пост о java script 1', body: 'java script универсальный ЯП',},
-                    { id: 2, title: 'Пост о java script 2', body: 'java script универсальный ЯП',},
-                    { id: 3, title: 'Пост о java script 3', body: 'java script универсальный ЯП',},
-                    { id: 4, title: 'Пост о java script 4', body: 'java script универсальный ЯП',},
-                ],
+                posts: [],
                 dialogVisible: false,
+                isPostsLoading: false,
+                selectedSort: '',
+                sortOptions: [
+                    {value: 'title', name: 'По названию'},
+                    {value: 'body', name: 'По описанию'},
+                ]
             }
         },
         methods: {
@@ -53,8 +73,27 @@
             },
             showDialog(){
                 this.dialogVisible = true;
+            },
+            async fetchPosts(){
+                try { 
+                    this.isPostsLoading = true;
+                    const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10'); 
+                    this.posts = response.data;
+                } catch (e) {
+                    alert('Ошибка запроса REST API');
+                } finally {
+                    this.isPostsLoading = false; 
+                }
             }
-        }
+        },
+        mounted() {
+            this.fetchPosts();
+        },
+        computed: {
+            sortedPosts(){
+                return [...this.posts].sort((post1, post2) => post1[this.selectedSort]?.localeCompare(post2[this.selectedSort]));
+            }
+        },
     }
 </script>
 
@@ -66,5 +105,10 @@
     }
     .app{
         padding: 20px;
+    }
+    .app__btns{
+        margin: 15px 0;
+        display: flex;
+        justify-content: space-between;
     }
 </style>
